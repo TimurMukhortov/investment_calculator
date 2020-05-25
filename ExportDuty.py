@@ -1,19 +1,19 @@
-from ExcelRepository import ExcelRepository
+from ExcelRepository import ExcelRepository, PRICE_LIST
 
 
 def get_price(area: str, product: str):
-    excel_repository = ExcelRepository()
+    excel_repository = ExcelRepository(PRICE_LIST)
     price = excel_repository.get_price(area, product)
     return price
 
 
 def get_transport_expenses(area: str, product: str):
-    excel_repository = ExcelRepository()
+    excel_repository = ExcelRepository(PRICE_LIST)
     expenses = excel_repository.get_expenses(area, product)
     return expenses
 
 
-def export_duty(course: float, area: str, product: str):
+def get_export_duty(course: float, area: str, product: str):
     price = get_price(area, product)
     transport_expenses = get_transport_expenses(area, product)
     result = (price - transport_expenses) * course
@@ -27,8 +27,6 @@ class ExportDuty:
     product: str
     # курс доллара
     course: float
-    # год
-    year: int
     # цена за товар
     price: float
     # цена за транспортировку
@@ -36,11 +34,10 @@ class ExportDuty:
     # экспортная пошлина
     export_duty: float
 
-    def __init__(self, area: str, product: str, course: float, year: int):
+    def __init__(self, area: str, product: str, course: float):
         self.area = area
         self.product = product
         self.course = course
-        self.year = year
         self.price = get_price(area, product)
         self.transport_expenses = get_transport_expenses(area, product)
-        self.export_duty = export_duty(course, area, product)
+        self.export_duty = get_export_duty(course, area, product)
