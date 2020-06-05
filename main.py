@@ -1,8 +1,9 @@
 import tkinter as tk
 from enum import Enum
 
-from Calculate import get_income, get_investment_per_tonne_of_capacity
+import numpy
 
+from Calculate import get_investment_per_tonne_of_capacity
 from CashFlow import CashFlow
 
 
@@ -51,54 +52,59 @@ def calculate():
     residual_value = year_investment * 6
     # Амортизация
     depreciation = year_investment * 6 / 10
-    cash_flow_list: list[CashFlow] = list()
+    cash_flow_list: list[CashFlow] = []
     for current_year in range(START_YEAR, END_YEAR + 1):
         cash_flow = CashFlow(area, process, course, oil_price_brent, oil_price_urals, current_year, residual_value,
                              depreciation)
 
         # СУГ
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.SUG.value))
+        cash_flow.append_to_income_for_year(Products.SUG.value)
         cash_flow.append_to_sum_product(Products.SUG.value)
 
         # Нафта
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.NAFTA.value))
+        cash_flow.append_to_income_for_year(Products.NAFTA.value)
         cash_flow.append_to_sum_product(Products.NAFTA.value)
 
         # Аи-92
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.AI_92.value))
+        cash_flow.append_to_income_for_year(Products.AI_92.value)
         cash_flow.append_to_sum_product(Products.AI_92.value)
 
         # Аи-95
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.AI_95.value))
+        cash_flow.append_to_income_for_year(Products.AI_95.value)
         cash_flow.append_to_sum_product(Products.AI_95.value)
 
         # ДТ, не соотв. ТР
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.DF_NOT_TR.value))
+        cash_flow.append_to_income_for_year(Products.DF_NOT_TR.value)
         cash_flow.append_to_sum_product(Products.DF_NOT_TR.value)
 
         # ДТ, соотв. ТР
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.DF_TR.value))
+        cash_flow.append_to_income_for_year(Products.DF_TR.value)
         cash_flow.append_to_sum_product(Products.DF_TR.value)
 
         # ВГО
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.VGO.value))
+        cash_flow.append_to_income_for_year(Products.VGO.value)
         cash_flow.append_to_sum_product(Products.VGO.value)
 
         # Гудрон
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.TAR.value))
+        cash_flow.append_to_income_for_year(Products.TAR.value)
         cash_flow.append_to_sum_product(Products.TAR.value)
 
         # Кокс
-        cash_flow.append_to_income_for_year(get_income(area, process, course, Products.COKE.value))
+        cash_flow.append_to_income_for_year(Products.COKE.value)
         cash_flow.append_to_sum_product(Products.COKE.value)
 
-        print(cash_flow.calculate_profit())
+        cash_flow.calculate_profit()
 
         # Выручка
         cash_flow_list.append(cash_flow)
 
         # вычитаем остаточную стоимость за 1 год
-        residual_value = residual_value - year_investment
+        if residual_value >= 0:
+            residual_value = residual_value - year_investment
+    profit_list: list[float] = []
+    for cash in cash_flow_list:
+        profit_list.append(cash.profit)
+    print("NPV = " + depreciation * 6 + numpy.npv(0.13, profit_list))
 
 
 # Настройки главного окна:
